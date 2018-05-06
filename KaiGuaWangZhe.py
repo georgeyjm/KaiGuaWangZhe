@@ -12,18 +12,9 @@ import os
 from selenium import webdriver
 from threading import Thread
 from pymongo import MongoClient
+from config import *
 
 jieba.setLogLevel(20)
-
-HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36'}
-
-# Config
-ROOT_URL = 'question-zh.hortor.net'
-BROWSER_PAGE = True
-BROWSER_KEYWORDS_ONLY = False
-SAY_ANSWER = 2 # set to >= 5 to disable
-NUM_SEARCH_KEYWORDS = 10
-NUM_POSSIBLE_KEYWORDS = 5
 
 class Handler(FileSystemEventHandler):
     '''Handler for any file changes for the battle question.'''
