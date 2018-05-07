@@ -60,7 +60,7 @@ git clone https://github.com/yu-george/KaiGuaWangZhe.git
 
 ### Usage
 
-1. *(Optional)* If you are using a database, please run the database first:
+1. *(Optional)* If you are using a database, please start the MongoDB client first:
 
 ```shell
 mongod --dbpath <DB_PATH>
