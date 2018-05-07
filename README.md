@@ -38,7 +38,7 @@
 #### Python
 
 :white_check_mark: Python 3.X  
-:grey_question:    Python 2.X  
+:x:    Python 2.X
 
 ### 安装
 

@@ -38,7 +38,7 @@ This program is a helper program for the WeChat Mini Program "Mind King", its fu
 #### Python
 
 :white_check_mark: Python 3.X  
-:grey_question:    Python 2.X  
+:x:    Python 2.X
 
 ### Installation
 
