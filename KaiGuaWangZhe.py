@@ -1,6 +1,3 @@
-# Remember to start MongoDB client with:
-#   mongod --dbpath ~/db
-
 import requests
 import jieba
 import jieba.analyse
@@ -22,9 +19,10 @@ class Handler(FileSystemEventHandler):
         super().__init__()
 
     def on_created(self, event):
-        global newQuestion
-        if event.src_path == 'charles/{}/question/bat/findQuiz'.format(ROOT_URL):
-            data = json.load(open('charles/{}/question/bat/findQuiz'.format(ROOT_URL)))['data']
+        if USE_DB:
+            global newQuestion
+        if event.src_path == '{}/question/bat/findQuiz'.format(ROOT_DIR):
+            data = json.load(open('{}/question/bat/findQuiz'.format(ROOT_DIR)))['data']
             questionNum = data['num']
             question = data['quiz']
             options = data['options']
@@ -42,27 +40,18 @@ class Handler(FileSystemEventHandler):
             if confidence >= SAY_ANSWER:
                 os.system('say -v ting-ting {}'.format(answer))
 
-        elif event.src_path == 'charles/{}/question/bat/choose'.format(ROOT_URL):
-            chooseData = json.load(open('charles/{}/question/bat/choose'.format(ROOT_URL)))['data']
+        elif USE_DB and event.src_path == '{}/question/bat/choose'.format(ROOT_DIR):
+            chooseData = json.load(open('{}/question/bat/choose'.format(ROOT_DIR)))['data']
             if newQuestion:
-                # correctIndex = json.load(open('charles/{}/question/bat/choose'.format(ROOT_URL)))['data']['answer'] - 1
-                # data = json.load(open('charles/{}/question/bat/findQuiz'.format(ROOT_URL)))['data']
-                # record = {'question': data['quiz'], 'answer': data['options'][correctIndex]}
-                # questions.insert_one(record)
-                # # print('插入数据：{}，答案为：{}'.format(data['quiz'], data['options'][correctIndex]))
-                # newQuestion = False
-
                 correctIndex = chooseData['answer'] - 1
-                quizData = json.load(open('charles/{}/question/bat/findQuiz'.format(ROOT_URL)))['data']
-                # print('answer', quizData['options'][chooseData['answer'] - 1])
-                # print('option', quizData['options'][chooseData['option'] - 1])
+                quizData = json.load(open('{}/question/bat/findQuiz'.format(ROOT_DIR)))['data']
                 record = {'question': quizData['quiz'], 'answer': quizData['options'][correctIndex]}
                 questions.insert_one(record)
                 print('插入数据：{}，答案为：{}'.format(quizData['quiz'], quizData['options'][correctIndex]))
                 newQuestion = False
             elif chooseData['yes'] == False: # Incorrect database record (some redundant code)
                 correctIndex = chooseData['answer'] - 1
-                quizData = json.load(open('charles/{}/question/bat/findQuiz'.format(ROOT_URL)))['data']
+                quizData = json.load(open('{}/question/bat/findQuiz'.format(ROOT_DIR)))['data']
                 record = {'question': quizData['quiz'], 'answer': quizData['options'][correctIndex]}
                 incorrectAnswer = questions.find_one({'question': quizData['quiz']})['answer']
                 questions.delete_one({'question': quizData['quiz']})
@@ -70,14 +59,16 @@ class Handler(FileSystemEventHandler):
                 print('更改数据：{}，答案从：{}，更改为：{}'.format(quizData['quiz'], incorrectAnswer, quizData['options'][correctIndex]))
 
 def get_answer(question, options):
-    global newQuestion
-    if BROWSER_PAGE:
+    if USE_DB:
+        global newQuestion
+    if USE_BROWSER:
         Thread(target=open_browser, args=(question,)).start()
 
-    dbAnswer = questions.find_one({'question': question})
-    if dbAnswer:
-        return dbAnswer['answer'], [], 4
-    newQuestion = True
+    if USE_DB:
+        dbAnswer = questions.find_one({'question': question})
+        if dbAnswer:
+            return dbAnswer['answer'], [], 4
+        newQuestion = True
 
     web = requests.get('https://www.baidu.com/s?wd={}'.format(question), headers=HEADERS)
     soup = BeautifulSoup(web.text, 'lxml')
@@ -107,19 +98,20 @@ def open_browser(search):
     except Exception:
         pass
 
-client = MongoClient()
-db = client['TouNaoWangZhe']
-questions = db['questions']
-newQuestion = False
+if USE_DB:
+    client = MongoClient()
+    db = client[DB_NAME]
+    questions = db[TABLE_NAME]
+    newQuestion = False
 
-if BROWSER_PAGE:
+if USE_BROWSER:
     driver = webdriver.Chrome()
     driver.set_window_size(1440, 900)
     driver.set_window_position(0, 0)
 
 handler = Handler()
 observer = Observer()
-observer.schedule(handler, path='charles/{}/question'.format(ROOT_URL), recursive=True)
+observer.schedule(handler, path='{}/question'.format(ROOT_DIR), recursive=True)
 observer.start()
 
 try:
@@ -129,5 +121,5 @@ except KeyboardInterrupt:
     observer.stop()
 observer.join()
 
-if BROWSER_PAGE:
+if USE_BROWSER:
     driver.quit()
