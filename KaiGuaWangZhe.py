@@ -26,19 +26,18 @@ class Handler(FileSystemEventHandler):
             questionNum = data['num']
             question = data['quiz']
             options = data['options']
-            print('\n\n第{}题：{}'.format(questionNum, question))
+            print(MSGS['QUESTION'].format(questionNum, question))
             answer, possibles, confidence = get_answer(question, options)
             if confidence == 4:
-                print('答案（数据库）：{}'.format(answer))
+                print(MSGS['ANSWER_DB'].format(answer))
             elif confidence == 3:
-                print('答案（百度百科）：{}'.format(answer))
+                print(MSGS['ANSWER_BAIKE'].format(answer))
             elif confidence == 2:
-                print('答案（关键词提取）：{}'.format(answer))
-                # print('答案：{}\n其他可能答案关键词：{}'.format(answer, ', '.join(possibles)))
+                print(MSGS['ANSWER_KEYWORD'].format(answer))
             elif confidence == 1:
-                print('答案（词频）：{}\n可能答案关键词：{}'.format(answer, ', '.join(possibles)))
+                print(MSGS['FREQ'].format(answer, ', '.join(possibles)))
             if confidence >= SAY_ANSWER:
-                os.system('say -v ting-ting {}'.format(answer))
+                os.system('say -v {} {}'.format(READ_VOICE, answer))
 
         elif USE_DB and event.src_path == '{}/question/bat/choose'.format(ROOT_DIR):
             chooseData = json.load(open('{}/question/bat/choose'.format(ROOT_DIR)))['data']
@@ -47,7 +46,7 @@ class Handler(FileSystemEventHandler):
                 quizData = json.load(open('{}/question/bat/findQuiz'.format(ROOT_DIR)))['data']
                 record = {'question': quizData['quiz'], 'answer': quizData['options'][correctIndex]}
                 questions.insert_one(record)
-                print('插入数据：{}，答案为：{}'.format(quizData['quiz'], quizData['options'][correctIndex]))
+                print(MSGS[DB_INSERT].format(quizData['quiz'], quizData['options'][correctIndex]))
                 newQuestion = False
             elif chooseData['yes'] == False: # Incorrect database record (some redundant code)
                 correctIndex = chooseData['answer'] - 1
@@ -56,7 +55,7 @@ class Handler(FileSystemEventHandler):
                 incorrectAnswer = questions.find_one({'question': quizData['quiz']})['answer']
                 questions.delete_one({'question': quizData['quiz']})
                 questions.insert_one(record)
-                print('更改数据：{}，答案从：{}，更改为：{}'.format(quizData['quiz'], incorrectAnswer, quizData['options'][correctIndex]))
+                print(MSGS[DB_CHANGE].format(quizData['quiz'], incorrectAnswer, quizData['options'][correctIndex]))
 
 def get_answer(question, options):
     if USE_DB:
@@ -87,7 +86,7 @@ def get_answer(question, options):
         if keyword in options:
             return keyword, keywords[:NUM_POSSIBLE_KEYWORDS], 2
     counts = [abstracts.count(i) for i in options]
-    mostCount = options[counts.index(max(counts))] if max(counts) > 0 else '无法找到答案！'
+    mostCount = options[counts.index(max(counts))] if max(counts) > 0 else MSGS['NO_ANSWER']
     return mostCount, keywords[:NUM_POSSIBLE_KEYWORDS], 1
 
 def open_browser(search):
@@ -115,7 +114,7 @@ observer.schedule(handler, path='{}/question'.format(ROOT_DIR), recursive=True)
 observer.start()
 
 try:
-    input('开挂开始！')
+    input(MSGS['START'])
     observer.stop()
 except KeyboardInterrupt:
     observer.stop()
