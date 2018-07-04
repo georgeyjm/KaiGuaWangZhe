@@ -1,3 +1,5 @@
+from pathlib import Path
+
 ##### 用户自定义配置 #####
 
 # 程序提示信息语言
@@ -24,7 +26,7 @@ NUM_SEARCH_KEYWORDS = 10
 NUM_POSSIBLE_KEYWORDS = 5
 
 
-##### 程序设置 (一般无需更改) #####
+##### 高级设置 (一般无需更改) #####
 
 # 头脑王者题目的根域名，定位文件夹用
 ROOT_URL = 'question-zh.hortor.net'
@@ -32,9 +34,10 @@ ROOT_URL = 'question-zh.hortor.net'
 HEADERS = {'User-Agent': 'Mozilla/5.0'}
 
 
-##### 程序设置（无需更改） #####
+##### 程序配置（无需更改） #####
 
-ROOT_DIR = '{}/{}'.format(MIRROR_PATH, ROOT_URL)
+MIRROR_PATH = Path(MIRROR_PATH)
+ROOT_DIR = MIRROR_PATH / ROOT_URL
 
 MSGS = {
     'zh': {

@@ -32,13 +32,13 @@
 #### 操作系统
 
 :white_check_mark: macOS  
-:grey_question:    Windows（未测试）  
+:x:                Windows  
 :grey_question:    Linux（未测试）
 
 #### Python
 
 :white_check_mark: Python 3.X  
-:x:    Python 2.X
+:x:                Python 2.X
 
 ### 安装
 
@@ -68,7 +68,7 @@ mongod --dbpath <DB_PATH>
 
 2. 运行你的网络抓包软件，并设置镜像
 
-3. 在你的手机上设置网络代理，并代理至电脑上
+3. 在你的手机上设置网络代理，并代理至电脑上（确认网络抓包软件能够抓取手机上的网络请求）
 
 4. 更换工作路径到开挂王者的路径，并运行开挂王者程序
 
